@@ -53,9 +53,39 @@ class Model(nn.Module):
 
 #TRAINING FUCNTION 
 
-def train(model,dataloader):
+loss_calc=nn.CrossEntropyLoss()
+
+def train(model,dataloader,optimizer):
     
-    model.train()
+    model.train()    #swithces model to training mode only 
+    
+    data_size=len(training_data)
+    
+    for current_batch, (images,labels) in enumerate(dataloader):
+        
+        images.to(device)
+        labels.to(device)
+        
+        #FORWARD PASS 
+        prediction=model(images)
+        loss=loss_calc(prediction,y)
+        
+        
+        #BACKPASS
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+        
+        
+        #report progress
+        if current_batch%batch_size==0: 
+            
+            print('Batch done')
+            print('Loss is ', loss.item())
+            print('Images processed =', min((current_batch+ 1) * len(X), data_size))
+        
+        
+        
     
     
     
