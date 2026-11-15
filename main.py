@@ -53,11 +53,12 @@ class Model(nn.Module):
 
 #TRAINING FUCNTION 
 
-loss_calc=nn.CrossEntropyLoss()
+
 
 def train(model,dataloader,optimizer):
     
     model.train()    #swithces model to training mode only 
+    loss_calc=nn.CrossEntropyLoss()
     
     data_size=len(training_data)
     
@@ -83,6 +84,43 @@ def train(model,dataloader,optimizer):
             print('Batch done')
             print('Loss is ', loss.item())
             print('Images processed =', min((current_batch+ 1) * len(X), data_size))
+            
+            
+            
+            
+            
+            
+            
+#TESTING FUCNTON
+
+ 
+def test(model,dataloader):
+    model.eval()   #just sets model to eval mode similiar to model.test()
+    
+    number_of_batches=len(dataloader)
+    data_size=len(training_data
+    
+    for images, labels in dataloader:
+        
+        images.to(device)
+        labels.to(device)
+        
+        prediction=model(images)
+        
+        #to find accuracy we first convert raw score to values then compare with labels
+        prediction=prediction.argmax(1)
+        corrected_prediction= (prediction==labels)
+        correct_predictions = correct_predictions.type(torch.float)
+        
+        correct += correct_predictions.sum().item()
+        
+    accuracy=correct/data_size
+    
+    retrun accuracy
+        
+    
+    
+    
         
         
         
