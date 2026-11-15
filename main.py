@@ -46,8 +46,7 @@ class Model(nn.Module):
         x=self.flatten(images)
         raw_scores=self.stack(images)
         return raw_scores
-        
-        
+
 
 
 
@@ -84,13 +83,13 @@ def train(model,dataloader,optimizer):
             print('Batch done')
             print('Loss is ', loss.item())
             print('Images processed =', min((current_batch+ 1) * len(X), data_size))
-            
-            
-            
-            
-            
-            
-            
+
+
+
+
+
+
+   
 #TESTING FUCNTON
 
  
@@ -120,35 +119,6 @@ def test(model,dataloader):
         
     
     
-    
-        
-        
-        
-    
-    
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -156,39 +126,102 @@ def test(model,dataloader):
 
 #LOADING DATA 
 
-transformation=v2.Compose([
+
+def load_data(batch_size):
+
+    transformation = v2.Compose([
         v2.ToImage(),
         v2.ToDtype(torch.float32, scale=True)
     ])
 
-
-
-#training set
-
-training_data=datasets.MNIST(
-    root=data_storage_path,
-    train=True,
-    download=True,
-    transform=transformation
+    # training set
+    training_data = datasets.MNIST(
+        root=data_storage_path,
+        train=True,
+        download=True,
+        transform=transformation
     )
+
+    training_dataloader = DataLoader(
+        training_data,
+        batch_size=batch_size,
+        shuffle=True
+    )
+
+    # testing set
+    testing_data = datasets.MNIST(
+        root=data_storage_path,
+        train=False,
+        download=True,
+        transform=transformation
+    )
+
+    testing_dataloader = DataLoader(
+        testing_data,
+        batch_size=batch_size,
+        shuffle=False
+    )
+
+    return training_dataloader, testing_dataloader
     
-training_dataloader=Dataloader(
-    training_data,
-    batch_size=batch_size               #batch_size doesnt exist yet we need to move this whole part down so that its called after choosing model 
-    shuffle=True
-    )
+
+
+
+
+
+
+
+
+
+    
+#MAIN MENU AND DEFAULTS 
+print("\n==============================")
+print("       DIGIT GUESSER")
+print("==============================")
+
+print("1. Train model")
+print("2. Test model using images")
+print("3. Change device")
+
+choice = input("\nChoose an option (1/2/3): ").strip()
+
+
+if choice=="3":
+    if device=="cuda":
+        device=="cpu"
+    elif torch.cuda.is_available(): device=="cuda"
+    else: print('Switching device unavailable')
+    
+    print(f"Using {device} device")
+    
+    
+    
+if choice=="1":
+    #CHECK PREVIOUS SAVED DATA 
+    #ASK(IF NO SAVES) FOR NEW VALUES 
+    #RUN MODEL 
+    #SAVE MODEL 
+    
+if choice=="2":
+    #ASK IMAGE LOCATION 
+    #RUN TESTING MODEL 
     
 
-#testing set 
-testing_data=datasets.MNIST(
-    root=data_storage_path,
-    train=False,
-    download=TabError,
-    transform=transformation
-    )
- 
- testing_datalaoder=Dataloader(
-    testing_data,
-    batch_size=batch_size             #batch_size doesnt exist yet we need to move this whole part down so that its called after choosing model 
-    shuffle=False
-    )
+
+
+
+
+
+
+#TRAINING MODE 
+
+
+
+
+#TESTING MODE
+
+
+
+
+
+
