@@ -1,7 +1,7 @@
 import torch
 
 from torch import nn 
-from torch.utis.data import Dataloader
+from torch.utils.data import DataLoader
 from torchvision import datasets 
 from torchvision.transforms import v2
 
@@ -14,11 +14,11 @@ from pathlib import Path
 
 #SETTINGS/ BASIC SETUP
 
-if torch.cuda_is_available():   device="cuda"
+if torch.cuda.is_available():   device="cuda"
 else:   device="cpu"
-print('Using ', device' to run the model')
+print('Using ', device, ' to run the model')
 
-base_dir=Path(__file__).reolve().parent
+base_dir=Path(__file__).resolve().parent
 model_path=base_dir / "model.pth"
 data_storage_path=base_dir / "data"
 img_path=base_dir/"images"
@@ -34,17 +34,17 @@ class Model(nn.Module):
         
         self.flatten=nn.Flatten()
         self.stack=nn.Sequential(
-            nn.linear(28*28, 512),
-            nn.ReLU()
-            nn.linear(512, 512),
-            nn.ReLU()
-            nn.linear(512, 512),
-            nn.ReLU()
-            nn.linear(512, 10),
+            nn.Linear(28*28, 512),
+            nn.ReLU(),
+            nn.Linear(512, 512),
+            nn.ReLU(),
+            nn.Linear(512, 512),
+            nn.ReLU(),
+            nn.Linear(512, 10),
         )
         
     def forward(self,images):
-        x=self.flatten(images)
+        images=self.flatten(images)
         raw_scores=self.stack(images)
         return raw_scores
 
@@ -60,16 +60,16 @@ def train(model,dataloader,optimizer):
     model.train()    #swithces model to training mode only 
     loss_calc=nn.CrossEntropyLoss()
     
-    data_size=len(training_data)
+    data_size=len(dataloader.dataset)                          #data_size = len(training_data) doesnt work as training_data isnt defined
     
     for current_batch, (images,labels) in enumerate(dataloader):
         
-        images.to(device)
-        labels.to(device)
+        images = images.to(device)
+        labels = labels.to(device)
         
         #FORWARD PASS 
         prediction=model(images)
-        loss=loss_calc(prediction,y)
+        loss=loss_calc(prediction,labels)
         
         
         #BACKPASS
@@ -83,7 +83,7 @@ def train(model,dataloader,optimizer):
             
             print('Batch done')
             print('Loss is ', loss.item())
-            print('Images processed =', min((current_batch+ 1) * len(X), data_size))
+            print('Images processed =', min((current_batch+ 1) * len(images), data_size))
 
 
 
@@ -98,12 +98,12 @@ def test(model,dataloader):
     model.eval()   #just sets model to eval mode similiar to model.test()
     
     number_of_batches=len(dataloader)
-    data_size=len(training_data
+    data_size=len(dataloader.dataset)
     
     for images, labels in dataloader:
         
-        images.to(device)
-        labels.to(device)
+        images=images.to(device)
+        labels=abels.to(device)
         
         prediction=model(images)
         
@@ -116,7 +116,7 @@ def test(model,dataloader):
         
     accuracy=correct/data_size
     
-    retrun accuracy
+    return accuracy
         
     
     
@@ -171,71 +171,23 @@ def load_data(batch_size):
 
 
 
-
-
-
-    
-#MAIN MENU AND DEFAULTS 
-print("\n==============================")
-print("       DIGIT GUESSER")
-print("==============================")
-
-print("1. Train model")
-print("2. Test model using images")
-print("3. Change device")
-
-choice = input("\nChoose an option (1/2/3): ").strip()
-
-
-if choice=="3":
-    if device=="cuda":
-        device=="cpu"
-    elif torch.cuda.is_available(): device=="cuda"
-    else: print('Switching device unavailable')
-    
-    print(f"Using {device} device")
-    
-    
-    
-if choice=="1":
-    #CHECK PREVIOUS SAVED DATA 
-    #ASK(IF NO SAVES) FOR NEW VALUES 
-    
-    
-    
-    epoch=int(input('Enter number of epochs'))
-    lr=int(input('Enter learning rate'))
-    batch_size=int(input('Enter batch size'))
-    
-    train_model(epoch,lr,batch_size)
-    
-
-    
-if choice=="2":
-    #ASK IMAGE LOCATION 
-    test_image() 
-    
-else: print('Invalid option')
-
-
-
-
-
 #TRAINING MODE   
 def train_model(epochs,lr,batch_size):
     
     print('Loading data to train model on.............')
-    training_dataloader, testing_dataloader=load_data()
+    training_dataloader, testing_dataloader=load_data(batch_size)
     
     
-    print('Data loaded successfully./nTraining a new model...............')
+    print('Data loaded successfully.\nTraining a new model...............')
     
-    model = NeuralNetwork().to(device)
+    model = Model().to(device)
     
-    optimizer=torch.otpim.Adam(
-        model.parametres(),
+    optimizer=torch.optim.Adam(
+        model.parameters(),
         lr=lr
     )
+    
+    current_epoch=0
     
     for epoch in range(epochs):
         train(model,training_dataloader,optimizer)
@@ -271,4 +223,46 @@ def train_model(epochs,lr,batch_size):
 
 
 
+  
+#MAIN MENU AND DEFAULTS 
+print("\n==============================")
+print("       DIGIT GUESSER")
+print("==============================")
+
+print("1. Train model")
+print("2. Test model using images")
+print("3. Change device")
+
+choice = input("\nChoose an option (1/2/3): ").strip()
+
+if choice=="1":
+    #CHECK PREVIOUS SAVED DATA 
+    #ASK(IF NO SAVES) FOR NEW VALUES 
+    
+    
+    
+    epoch=int(input('Enter number of epochs '))
+    lr=float(input('Enter learning rate '))
+    batch_size=int(input('Enter batch size' ))
+    
+    train_model(epoch,lr,batch_size)
+    
+elif choice=="2":
+    #ASK IMAGE LOCATION 
+    test_image() 
+    
+
+
+elif choice=="3":
+    if device=="cuda":
+        device="cpu"
+    elif torch.cuda.is_available(): device="cuda"
+    else: print('Switching device unavailable')
+    
+    print(f"Using {device} device")
+    
+    
+    
+
+else: print('Invalid option')
 
