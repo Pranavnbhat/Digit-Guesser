@@ -215,8 +215,7 @@ if choice=="2":
     #ASK IMAGE LOCATION 
     test_image() 
     
-
-
+else: print('Invalid option')
 
 
 
@@ -244,17 +243,23 @@ def train_model(epochs,lr,batch_size):
         current_epoch+=epoch
         print("Epoch", current_epoch, "/", epochs)
         
-        accuracry=test(model, training_dataloader)
+        accuracy=test(model, training_dataloader)
         
         
     print("\nTraining complete")
     
-    
-    
-    
+    #GET OLDER MODEL ACCURACY 
+    #COMPARE ACCURACIES 
     #SAVE MODEL 
-    #COMPARE MODEL 
+    previous_accuracy=0.00001   #just for debugging rn 
+    if previous_accuracy is not None:
+        
+        if accuracy>previous_accuracy:
+            torch.save(model.state_dict(), model_path)
+            print("Newer model's accuracy is higher by x%, saving newer model to ", model_path)
+        else: print("Older model's accuracy is higher by x%, not saving the newer model")
     
+    else:   torch.save(model.state_dict(), model_path); print("Model saved to ", model_path)
 
 
 
