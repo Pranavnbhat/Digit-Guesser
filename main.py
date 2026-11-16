@@ -100,19 +100,21 @@ def test(model,dataloader):
     number_of_batches=len(dataloader)
     data_size=len(dataloader.dataset)
     
+    correct=0
+    
     for images, labels in dataloader:
         
         images=images.to(device)
-        labels=abels.to(device)
+        labels=labels.to(device)
         
         prediction=model(images)
         
         #to find accuracy we first convert raw score to values then compare with labels
         prediction=prediction.argmax(1)
-        corrected_prediction= (prediction==labels)
-        correct_predictions = correct_predictions.type(torch.float)
+        corrected_predictions= (prediction==labels)
+        corrected_predictions = corrected_predictions.type(torch.float)
         
-        correct += correct_predictions.sum().item()
+        correct += corrected_predictions.sum().item()
         
     accuracy=correct/data_size
     
@@ -193,7 +195,7 @@ def train_model(epochs,lr,batch_size):
         train(model,training_dataloader,optimizer)
         
         current_epoch+=epoch
-        print("Epoch", current_epoch, "/", epochs)
+        print("Epoch", current_epoch+1, "/", epochs)
         
         accuracy=test(model, training_dataloader)
         
@@ -243,7 +245,7 @@ if choice=="1":
     
     epoch=int(input('Enter number of epochs '))
     lr=float(input('Enter learning rate '))
-    batch_size=int(input('Enter batch size' ))
+    batch_size=int(input('Enter batch size ' ))
     
     train_model(epoch,lr,batch_size)
     
