@@ -21,6 +21,7 @@ print('Using ', device' to run the model')
 base_dir=Path(__file__).reolve().parent
 model_path=base_dir / "model.pth"
 data_storage_path=base_dir / "data"
+img_path=base_dir/"images"
 
 
 
@@ -199,12 +200,20 @@ if choice=="3":
 if choice=="1":
     #CHECK PREVIOUS SAVED DATA 
     #ASK(IF NO SAVES) FOR NEW VALUES 
-    #RUN MODEL 
-    #SAVE MODEL 
+    
+    
+    
+    epoch=int(input('Enter number of epochs'))
+    lr=int(input('Enter learning rate'))
+    batch_size=int(input('Enter batch size'))
+    
+    train_model(epoch,lr,batch_size)
+    
+
     
 if choice=="2":
     #ASK IMAGE LOCATION 
-    #RUN TESTING MODEL 
+    test_image() 
     
 
 
@@ -213,7 +222,40 @@ if choice=="2":
 
 
 
-#TRAINING MODE 
+#TRAINING MODE   
+def train_model(epochs,lr,batch_size):
+    
+    print('Loading data to train model on.............')
+    training_dataloader, testing_dataloader=load_data()
+    
+    
+    print('Data loaded successfully./nTraining a new model...............')
+    
+    model = NeuralNetwork().to(device)
+    
+    optimizer=torch.otpim.Adam(
+        model.parametres(),
+        lr=lr
+    )
+    
+    for epoch in range(epochs):
+        train(model,training_dataloader,optimizer)
+        
+        current_epoch+=epoch
+        print("Epoch", current_epoch, "/", epochs)
+        
+        accuracry=test(model, training_dataloader)
+        
+        
+    print("\nTraining complete")
+    
+    
+    
+    
+    #SAVE MODEL 
+    #COMPARE MODEL 
+    
+
 
 
 
