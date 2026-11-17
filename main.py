@@ -7,6 +7,10 @@ from torchvision.transforms import v2
 
 from pathlib import Path
 
+from PIL import Image
+from tkinter import filedialog
+
+
 
 
 
@@ -21,7 +25,8 @@ print('Using ', device, ' to run the model')
 base_dir=Path(__file__).resolve().parent
 model_path=base_dir / "model.pth"
 data_storage_path=base_dir / "data"
-img_path=base_dir/"images"
+#img_path=base_dir/"images"
+
 
 
 
@@ -83,7 +88,7 @@ def train(model,dataloader,optimizer):
         
         #report progress
         processed=((current_batch+1)*batch_size)
-        if processed%10000==0:
+        if processed%1000==0:
             
         # if current_batch%batch_size==0: 
             
@@ -227,11 +232,11 @@ def train_model(epochs,lr,batch_size):
         
         
         if accuracy>previous_accuracy:
-            diff=accuracy-previous_accuracy
+            diff=(accuracy-previous_accuracy)*100
             torch.save(model.state_dict(), model_path)
             print(f"Newer model's accuracy is higher by {diff}%, saving newer model to ", model_path)
         else: 
-            diff=previous_accuracy-accuracy
+            diff=(previous_accuracy-accuracy)*100
             print(f"Older model's accuracy is higher by {diff}%, not saving the newer model")
     
     else:   torch.save(model.state_dict(), model_path); print("Model saved to ", model_path)
@@ -244,9 +249,44 @@ def train_model(epochs,lr,batch_size):
 def test_image():
     if not model_path.exists():
         print('No model found in', model_path)
+        return
     
     model=Model().to(device)
     model.load_state_dict(torch.load(model_path, weights_only=True))
+    
+    model.eval()
+    
+    
+    convert= v2.Compose([
+        v2.Resize((28, 28)),
+        v2.Grayscale(),
+        v2.ToImage(),
+        v2.ToDtype(torch.float32, scale=True)
+    ])
+    
+    
+    img_path = filedialog.askopenfilename(
+    filetypes=[("Images", "*.png *.jpg *.jpeg")]
+    )
+    
+    if not img_path:
+        print("No image selected")
+        return
+
+    
+    image=Image.open(img_path)
+    image=convert(image)
+    image = image.unsqueeze(0)
+    
+    result=model(image)
+    result=result.argmax(1).item()
+    
+    print('Result is ',result)
+    
+    
+    
+    
+    
     
     
     
@@ -280,7 +320,7 @@ if choice=="1":
     train_model(epoch,lr,batch_size)
     
 elif choice=="2":
-    #ASK IMAGE LOCATION 
+    
     test_image() 
     
 
