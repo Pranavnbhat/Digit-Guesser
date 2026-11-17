@@ -201,11 +201,9 @@ def train_model(epochs,lr,batch_size):
     
     model = Model().to(device)
     
-    optimizer=torch.optim.Adam(
-        model.parameters(),
-        lr=lr
-    )
     
+    
+    previous_accuracy = None
     
     if model_path.exists():
             
@@ -214,14 +212,18 @@ def train_model(epochs,lr,batch_size):
         print('Loading older model.........')
         
             
-        model=Model().to(device)
+        
         model.load_state_dict(torch.load(model_path, weights_only=True))
-        previous_accuracy=test(model,training_dataloader)
+        previous_accuracy=test(model,testing_dataloader)
         print('Model loaded successfully.')
         print('Model accuracy is',previous_accuracy*100,'%')
         print("==============================")    
     
     
+    optimizer=torch.optim.Adam(
+        model.parameters(),
+        lr=lr
+    )
     
     for epoch in range(epochs):
         
@@ -326,7 +328,7 @@ def main_menu():
     print('4. Exit')
     print("==============================")
 
-    choice = input("\nChoose an option (1/2/3): ").strip()
+    choice = input("\nChoose an option (1/2/3/4): ").strip()
 
     if choice=="1":
         #CHECK PREVIOUS SAVED DATA 
