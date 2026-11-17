@@ -207,6 +207,21 @@ def train_model(epochs,lr,batch_size):
     )
     
     
+    if model_path.exists():
+            
+        print("==============================")
+        print('\nOlder model found') 
+        print('Loading older model.........')
+        
+            
+        model=Model().to(device)
+        model.load_state_dict(torch.load(model_path, weights_only=True))
+        previous_accuracy=test(model,training_dataloader)
+        print('Model loaded successfully.')
+        print('Model accuracy is',previous_accuracy*100,'%')
+        print("==============================")    
+    
+    
     
     for epoch in range(epochs):
         
@@ -217,17 +232,16 @@ def train_model(epochs,lr,batch_size):
         train(model,training_dataloader,optimizer)
         
         
-        accuracy=test(model, training_dataloader)
+        accuracy=test(model, testing_dataloader)
         
         
         
     print("\nTraining complete")
     print('Accuracy is ', accuracy*100,'%')
     
-    #GET OLDER MODEL ACCURACY 
-    #COMPARE ACCURACIES 
-    #SAVE MODEL 
-    previous_accuracy=0.00001   #just for debugging rn 
+
+        
+    
     if previous_accuracy is not None:
         
         
@@ -275,7 +289,10 @@ def test_image():
 
     
     image=Image.open(img_path)
+    
     image=convert(image)
+    image = 1 - image  # converts black to white and vice versa
+    image=image.to(device)
     image = image.unsqueeze(0)
     
     result=model(image)
@@ -297,44 +314,59 @@ def test_image():
 
   
 #MAIN MENU AND DEFAULTS 
-print("\n==============================")
-print("       DIGIT GUESSER")
-print("==============================")
+def main_menu():
+    global device
+    print("\n==============================")
+    print("       DIGIT GUESSER")
+    print("==============================")
 
-print("1. Train model")
-print("2. Test model using images")
-print("3. Change device")
+    print("1. Train model")
+    print("2. Test model using images")
+    print("3. Change device")
+    print('4. Exit')
+    print("==============================")
 
-choice = input("\nChoose an option (1/2/3): ").strip()
+    choice = input("\nChoose an option (1/2/3): ").strip()
 
-if choice=="1":
-    #CHECK PREVIOUS SAVED DATA 
-    #ASK(IF NO SAVES) FOR NEW VALUES 
-    
-    
-    
-    epoch=int(input('Enter number of epochs '))
-    lr=float(input('Enter learning rate '))
-    batch_size=int(input('Enter batch size ' ))
-    
-    train_model(epoch,lr,batch_size)
-    
-elif choice=="2":
-    
-    test_image() 
-    
+    if choice=="1":
+        #CHECK PREVIOUS SAVED DATA 
+        #ASK(IF NO SAVES) FOR NEW VALUES 
+        
+        
+        
+        epoch=int(input('Enter number of epochs '))
+        lr=float(input('Enter learning rate '))
+        batch_size=int(input('Enter batch size ' ))
+        
+        train_model(epoch,lr,batch_size)
+        main_menu()
+        
+    elif choice=="2":
+        
+        test_image() 
+        main_menu()
+        
 
 
-elif choice=="3":
-    if device=="cuda":
-        device="cpu"
-    elif torch.cuda.is_available(): device="cuda"
-    else: print('Switching device unavailable')
+    elif choice=="3":
+        if device=="cuda":
+            device="cpu"
+            
+        elif torch.cuda.is_available(): device="cuda"
+        else: print('Switching device unavailable')
+        
+        print(f"Using {device} device")
+        main_menu()
     
-    print(f"Using {device} device")
-    
-    
-    
+    elif choice=="4":
+        print('Closing............')
+        return
+        
+        
+        
 
-else: print('Invalid option')
+    else: print('Invalid option')
+    
+    
+main_menu()
 
