@@ -60,7 +60,10 @@ def train(model,dataloader,optimizer):
     model.train()    #swithces model to training mode only 
     loss_calc=nn.CrossEntropyLoss()
     
+    batch_size=dataloader.batch_size
     data_size=len(dataloader.dataset)                          #data_size = len(training_data) doesnt work as training_data isnt defined
+    
+    current_batch=0
     
     for current_batch, (images,labels) in enumerate(dataloader):
         
@@ -79,11 +82,20 @@ def train(model,dataloader,optimizer):
         
         
         #report progress
-        if current_batch%batch_size==0: 
+        processed=((current_batch+1)*batch_size)
+        if processed%10000==0:
             
-            print('Batch done')
-            print('Loss is ', loss.item())
-            print('Images processed =', min((current_batch+ 1) * len(images), data_size))
+        # if current_batch%batch_size==0: 
+            
+           
+            # print('\nLoss is ', loss.item())
+            # print(current_batch)
+            # print('Images processed =', ((current_batch+1)*batch_size),'/',data_size)
+            
+            print('\nLoss is ', loss.item())
+            print('Images processed =', processed,'/',data_size)
+
+        
 
 
 
@@ -189,18 +201,23 @@ def train_model(epochs,lr,batch_size):
         lr=lr
     )
     
-    current_epoch=0
+    
     
     for epoch in range(epochs):
+        
+        print("\n==============================")
+        print("EPOCH", epoch+1, "/", epochs)
+        print("==============================")
+        
         train(model,training_dataloader,optimizer)
         
-        current_epoch+=epoch
-        print("Epoch", current_epoch+1, "/", epochs)
         
         accuracy=test(model, training_dataloader)
         
         
+        
     print("\nTraining complete")
+    print('Accuracy is ', accuracy*100,'%')
     
     #GET OLDER MODEL ACCURACY 
     #COMPARE ACCURACIES 
@@ -208,10 +225,14 @@ def train_model(epochs,lr,batch_size):
     previous_accuracy=0.00001   #just for debugging rn 
     if previous_accuracy is not None:
         
+        
         if accuracy>previous_accuracy:
+            diff=accuracy-previous_accuracy
             torch.save(model.state_dict(), model_path)
-            print("Newer model's accuracy is higher by x%, saving newer model to ", model_path)
-        else: print("Older model's accuracy is higher by x%, not saving the newer model")
+            print(f"Newer model's accuracy is higher by {diff}%, saving newer model to ", model_path)
+        else: 
+            diff=previous_accuracy-accuracy
+            print(f"Older model's accuracy is higher by {diff}%, not saving the newer model")
     
     else:   torch.save(model.state_dict(), model_path); print("Model saved to ", model_path)
 
@@ -220,6 +241,15 @@ def train_model(epochs,lr,batch_size):
 
 
 #TESTING MODE
+def test_image():
+    if not model_path.exists():
+        print('No model found in', model_path)
+    
+    model=Model().to(device)
+    model.load_state_dict(torch.load(model_path, weights_only=True))
+    
+    
+    
 
 
 
