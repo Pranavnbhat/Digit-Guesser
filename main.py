@@ -13,9 +13,6 @@ from tkinter import filedialog
 
 
 
-
-
-
 #SETTINGS/ BASIC SETUP
 
 if torch.cuda.is_available():   device="cuda"
@@ -26,7 +23,6 @@ base_dir=Path(__file__).resolve().parent
 model_path=base_dir / "model.pth"
 data_storage_path=base_dir / "data"
 #img_path=base_dir/"images"
-
 
 
 
@@ -52,7 +48,6 @@ class Model(nn.Module):
         images=self.flatten(images)
         raw_scores=self.stack(images)
         return raw_scores
-
 
 
 
@@ -100,10 +95,6 @@ def train(model,dataloader,optimizer):
             print('\nLoss is ', loss.item())
             print('Images processed =', processed,'/',data_size)
 
-        
-
-
-
 
 
 
@@ -142,8 +133,6 @@ def test(model,dataloader):
 
 
 
-
-
 #LOADING DATA 
 
 
@@ -154,12 +143,24 @@ def load_data(batch_size):
         v2.ToDtype(torch.float32, scale=True)
     ])
 
+
+    train_transformation=v2.Compose([
+        v2.ToImage(),
+        v2.ToDtype(torch.float32, scale=True),
+        v2.RandomAffine(15, translate=(0.1, 0.1), scale=(0.9, 1.1), shear=5)
+        
+        ])
+    
+    
+    
+    
+    
     # training set
     training_data = datasets.MNIST(
         root=data_storage_path,
         train=True,
         download=True,
-        transform=transformation
+        transform=train_transformation
     )
 
     training_dataloader = DataLoader(
@@ -277,7 +278,8 @@ def test_image():
         v2.Resize((28, 28)),
         v2.Grayscale(),
         v2.ToImage(),
-        v2.ToDtype(torch.float32, scale=True)
+        v2.ToDtype(torch.float32, scale=True),
+        v2.RandomInvert(p=1.0)
     ])
     
     
@@ -293,7 +295,7 @@ def test_image():
     image=Image.open(img_path)
     
     image=convert(image)
-    image = 1 - image  # converts black to white and vice versa
+    #image = 1 - image  # converts black to white and vice versa, commented it out as we are doing this in trnasform when laoding data 
     image=image.to(device)
     image = image.unsqueeze(0)
     
